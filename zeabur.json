@@ -1,3 +1,4 @@
 ﻿{
-    "start":  "cd server \u0026\u0026 python main.py"
+    "rootDirectory": "server",
+    "start": "python main.py"
 }

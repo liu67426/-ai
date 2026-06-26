@@ -23,9 +23,9 @@ from fastapi.responses import StreamingResponse, JSONResponse
 from pydantic import BaseModel
 import openai
 
-load_dotenv()
+load_dotenv(dotenv_path=Path(__file__).resolve().parent / ".env")
 
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = Path(__file__).resolve().parent
 WEBSITE_DIR = BASE_DIR / "website"
 DATA_DIR = BASE_DIR / "data"
 DATA_DIR.mkdir(exist_ok=True)
@@ -572,6 +572,7 @@ if __name__ == "__main__":
     print(f"  客服工作台：http://localhost:{port}/dashboard.html")
     print(f"  聊天浮窗示例：http://localhost:{port}/widget-demo.html")
     uvicorn.run("main:app", host="0.0.0.0", port=port, reload=False)
+
 
 
 

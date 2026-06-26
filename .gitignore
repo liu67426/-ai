@@ -20,3 +20,7 @@ check_api.py
 .vscode/
 
 !requirements.txt
+
+# Codex
+.codex/
+memory-server/
