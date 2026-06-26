@@ -1,4 +1,4 @@
-﻿# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 """平台 API 对接服务 - 支持 Shopfiy / 淘宝 mock / 拼多多 mock"""
 
 import json
