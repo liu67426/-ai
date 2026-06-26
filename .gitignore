@@ -10,7 +10,7 @@ data/
 
 # 临时文件
 *.log
-*.txt
+# *.txt (except requirements.txt)
 *.bat
 fix_db.py
 check_api.py
@@ -18,3 +18,5 @@ check_api.py
 # IDE
 .idea/
 .vscode/
+
+!requirements.txt
