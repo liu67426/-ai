@@ -1,0 +1,350 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>智联AI客服 - 工作台</title>
+<link rel="stylesheet" href="/css/style.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🤖</text></svg>">
+</head>
+<body>
+<div id="app">
+  <!-- 顶部导航 -->
+  <div class="top-nav">
+    <div class="top-nav-left">
+      <div class="top-nav-logo">智</div>
+      <div class="top-nav-title">智联AI客服</div>
+    </div>
+    <div class="top-nav-right">
+      <span id="statsDisplay" style="font-size:12px;color:var(--gray-500);margin-right:8px;"></span>
+      <button class="btn btn-ghost btn-sm" onclick="showAnalytics()">&#128200; 数据看板</button>
+      <button class="btn btn-ghost btn-sm" onclick="showKnowledgeBase()">&#128214; 知识库</button>
+      <button class="btn btn-ghost btn-sm" onclick="showSettings()">&#9881; 设置</button>
+      <a href="/" class="btn btn-ghost btn-sm">&#127968;</a>
+    </div>
+  </div>
+
+  <div class="app-layout" style="height:calc(100vh - 56px);">
+    <!-- 左侧对话列表 -->
+    <div class="conversation-panel">
+      <div class="conversation-header">
+        <div class="conversation-search">
+          <span class="search-icon">&#128269;</span>
+          <input type="text" id="searchInput" placeholder="搜索客户或对话..." oninput="filterConversations()">
+        </div>
+        <div class="filter-tabs">
+          <button class="filter-tab active" data-filter="all" onclick="switchFilter(this, 'all')">全部</button>
+          <button class="filter-tab" data-filter="waiting" onclick="switchFilter(this, 'waiting')">等待中</button>
+          <button class="filter-tab" data-filter="active" onclick="switchFilter(this, 'active')">进行中</button>
+          <button class="filter-tab" data-filter="closed" onclick="switchFilter(this, 'closed')">已关闭</button>
+        </div>
+      </div>
+      <div class="conversation-list" id="conversationList"></div>
+    </div>
+
+    <!-- 中间聊天 -->
+    <div class="chat-panel">
+      <div id="chatEmpty" class="chat-empty">
+        <div class="chat-empty-icon">&#128172;</div>
+        <div class="chat-empty-text">选择一个对话开始回复</div>
+      </div>
+      <div id="chatActive" style="display:none;flex-direction:column;height:100%;">
+        <div class="chat-header">
+          <div class="customer-info">
+            <div class="avatar" id="chatAvatar" style="width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;color:white;flex-shrink:0;">客</div>
+            <div>
+              <div class="customer-name" id="chatCustomerName">访客</div>
+              <div class="customer-status" id="chatStatus">在线</div>
+            </div>
+          </div>
+          <div class="actions">
+            <button class="btn btn-ghost btn-sm" onclick="closeConversation()">&#10005; 关闭</button>
+          </div>
+        </div>
+        <div class="chat-messages" id="chatMessages"></div>
+        <div class="chat-input-area">
+          <div class="chat-input-wrapper">
+            <textarea id="messageInput" rows="1" placeholder="输入消息... (Enter 发送, Shift+Enter 换行)" onkeydown="handleKeyDown(event)" oninput="autoResize(this)"></textarea>
+            <button class="send-btn" id="sendBtn" onclick="sendMessage()">&#10148;</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 右侧客户面板 -->
+    <div class="customer-panel" id="customerPanel">
+      <div class="customer-panel-header">客户信息</div>
+      <div class="customer-panel-body" id="customerPanelBody">
+        <div class="customer-card">
+          <div class="big-avatar" id="panelAvatar" style="background:#818CF8;">客</div>
+          <div class="big-name" id="panelName">访客</div>
+          <div class="big-email" id="panelEmail">-</div>
+        </div>
+        <div class="section-title">对话信息</div>
+        <div class="info-row"><span class="label">状态</span><span class="value" id="panelStatus">等待中</span></div>
+        <div class="info-row"><span class="label">来源</span><span class="value" id="panelSource">网页</span></div>
+        <div class="info-row"><span class="label">创建时间</span><span class="value" id="panelTime">-</span></div>
+        <div class="section-title">快捷回复</div>
+        <div id="quickReplyList"></div>
+        <button class="btn btn-ghost btn-sm btn-block" style="margin-top:6px;font-size:11px;" onclick="showAddQuickReply()">+ 添加快捷回复</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ 数据看板（全屏） ═══ -->
+<div id="analyticsPage" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:var(--gray-50);z-index:99999;overflow-y:auto;flex-direction:column;">
+  <!-- 顶部导航 -->
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 24px;background:white;border-bottom:1px solid var(--gray-200);flex-shrink:0;">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <button class="btn btn-ghost btn-sm" onclick="closeAnalytics()" style="font-size:14px;">&#8592; 返回工作台</button>
+      <span style="font-size:16px;font-weight:700;color:var(--gray-900);">&#128200; 数据看板</span>
+    </div>
+    <div style="font-size:12px;color:var(--gray-400);">数据实时更新</div>
+  </div>
+
+  <!-- 加载状态 -->
+  <div id="analytics-loading" style="flex:1;display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--gray-400);">正在加载数据...</div>
+
+  <!-- 内容区 -->
+  <div id="analytics-content" style="display:none;padding:24px;max-width:1200px;width:100%;margin:0 auto;box-sizing:border-box;">
+    <!-- 概览卡片 -->
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px;">
+      <div style="background:white;border-radius:12px;padding:20px;text-align:center;border:1px solid var(--gray-200);box-shadow:var(--shadow-sm);">
+        <div style="font-size:32px;font-weight:800;color:var(--primary);" id="stat-today">--</div>
+        <div style="font-size:13px;color:var(--gray-500);margin-top:4px;">今日对话</div>
+      </div>
+      <div style="background:white;border-radius:12px;padding:20px;text-align:center;border:1px solid var(--gray-200);box-shadow:var(--shadow-sm);">
+        <div style="font-size:32px;font-weight:800;color:var(--success);" id="stat-ai">--</div>
+        <div style="font-size:13px;color:var(--gray-500);margin-top:4px;">AI 回复数</div>
+      </div>
+      <div style="background:white;border-radius:12px;padding:20px;text-align:center;border:1px solid var(--gray-200);box-shadow:var(--shadow-sm);">
+        <div style="font-size:32px;font-weight:800;color:var(--warning);" id="stat-resp">--</div>
+        <div style="font-size:13px;color:var(--gray-500);margin-top:4px;">平均响应时间</div>
+      </div>
+      <div style="background:white;border-radius:12px;padding:20px;text-align:center;border:1px solid var(--gray-200);box-shadow:var(--shadow-sm);">
+        <div style="font-size:32px;font-weight:800;color:var(--danger);" id="stat-transfer">--</div>
+        <div style="font-size:13px;color:var(--gray-500);margin-top:4px;">转人工率</div>
+      </div>
+    </div>
+
+    <!-- 图表网格 -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+      <div style="background:white;border-radius:12px;border:1px solid var(--gray-200);padding:20px;box-shadow:var(--shadow-sm);">
+        <div style="font-size:14px;font-weight:600;color:var(--gray-700);margin-bottom:16px;">每日对话趋势</div>
+        <div style="position:relative;height:240px;"><canvas id="chart-trend"></canvas></div>
+      </div>
+      <div style="background:white;border-radius:12px;border:1px solid var(--gray-200);padding:20px;box-shadow:var(--shadow-sm);">
+        <div style="font-size:14px;font-weight:600;color:var(--gray-700);margin-bottom:16px;">知识库命中率</div>
+        <div style="position:relative;height:240px;"><canvas id="chart-kb"></canvas></div>
+      </div>
+      <div style="background:white;border-radius:12px;border:1px solid var(--gray-200);padding:20px;box-shadow:var(--shadow-sm);">
+        <div style="font-size:14px;font-weight:600;color:var(--gray-700);margin-bottom:16px;">响应时间分布</div>
+        <div style="position:relative;height:240px;"><canvas id="chart-response"></canvas></div>
+      </div>
+      <div style="background:white;border-radius:12px;border:1px solid var(--gray-200);padding:20px;box-shadow:var(--shadow-sm);">
+        <div style="font-size:14px;font-weight:600;color:var(--gray-700);margin-bottom:16px;">对话状态分布</div>
+        <div style="position:relative;height:240px;"><canvas id="chart-status"></canvas></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ 知识库弹窗 ═══ -->
+<div id="knowledgeModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);z-index:99998;align-items:center;justify-content:center;" onclick="if(event.target===this)closeKnowledgeBase()">
+  <div style="background:white;border-radius:16px;width:720px;max-width:92vw;max-height:90vh;overflow-y:auto;padding:28px;" onclick="event.stopPropagation()">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+      <h2 style="font-size:20px;font-weight:700;">&#128214; 知识库管理</h2>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <select class="form-input" id="kb-filter-cat" style="width:120px;padding:6px 10px;font-size:12px;" onchange="loadKnowledge()">
+          <option value="">全部分类</option>
+          <option value="商品咨询">商品咨询</option>
+          <option value="订单物流">订单物流</option>
+          <option value="售后政策">售后政策</option>
+          <option value="通用">通用</option>
+        </select>
+        <button class="btn btn-primary btn-sm" onclick="showAddKnowledge()">+ 新增</button>
+        <button class="btn btn-ghost btn-sm" onclick="closeKnowledgeBase()">&#10005;</button>
+      </div>
+    </div>
+    <p style="font-size:13px;color:var(--gray-500);margin-bottom:16px;">配置知识库后，AI 会自动匹配客户问题中的关键词，从知识库中查找最相关的答案作为参考。</p>
+    <div id="knowledgeList" style="display:flex;flex-direction:column;gap:8px;min-height:200px;"></div>
+  </div>
+</div>
+
+<!-- 新增/编辑知识条目弹窗 -->
+<div id="knowledgeEditModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);z-index:99999;align-items:center;justify-content:center;" onclick="if(event.target===this)closeKnowledgeEdit()">
+  <div style="background:white;border-radius:16px;width:560px;max-width:90vw;padding:28px;" onclick="event.stopPropagation()">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+      <h2 style="font-size:18px;font-weight:700;" id="kbEditTitle">新增知识条目</h2>
+      <button class="btn btn-ghost btn-sm" onclick="closeKnowledgeEdit()">&#10005;</button>
+    </div>
+    <input type="hidden" id="kb-edit-id">
+    <div class="form-group">
+      <label>问题/关键词 <span style="color:var(--danger);">*</span></label>
+      <input class="form-input" id="kb-edit-question" placeholder="如：发货时间、退换货流程、尺码怎么选">
+      <div class="form-hint">客户问这些关键词时，AI 会参考对应的答案</div>
+    </div>
+    <div class="form-group">
+      <label>标准答案 <span style="color:var(--danger);">*</span></label>
+      <textarea class="form-input" id="kb-edit-answer" rows="5" placeholder="请填写详细的标准回答..."></textarea>
+    </div>
+    <div class="form-group">
+      <label>分类</label>
+      <select class="form-input" id="kb-edit-cat">
+        <option value="通用">通用</option>
+        <option value="商品咨询">商品咨询</option>
+        <option value="订单物流">订单物流</option>
+        <option value="售后政策">售后政策</option>
+      </select>
+    </div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:8px;">
+      <button class="btn btn-secondary" onclick="closeKnowledgeEdit()">取消</button>
+      <button class="btn btn-primary" id="kbSaveBtn" onclick="saveKnowledge()">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ 设置弹窗 ═══ -->
+<div id="settingsModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);z-index:99997;align-items:center;justify-content:center;" onclick="if(event.target===this)closeSettings()">
+  <div style="background:white;border-radius:16px;width:680px;max-width:92vw;max-height:90vh;overflow-y:auto;padding:28px;" onclick="event.stopPropagation()">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+      <h2 style="font-size:20px;font-weight:700;">&#9881; 系统设置</h2>
+      <button class="btn btn-ghost btn-sm" onclick="closeSettings()">&#10005;</button>
+    </div>
+
+    <!-- 设置：标签切换 -->
+    <div style="display:flex;gap:4px;margin-bottom:20px;border-bottom:1px solid var(--gray-200);padding-bottom:4px;">
+      <button class="filter-tab active" data-set-tab="api" onclick="switchSettingsTab(this,'api')">API 配置</button>
+      <button class="filter-tab" data-set-tab="agent" onclick="switchSettingsTab(this,'agent')">客服设置</button>
+      <button class="filter-tab" data-set-tab="platform" onclick="switchSettingsTab(this,'platform')">平台对接</button>
+      <button class="filter-tab" data-set-tab="widget" onclick="switchSettingsTab(this,'widget')">浮窗样式</button>
+    </div>
+
+    <!-- API 配置 -->
+    <div class="set-tab" id="set-tab-api">
+      <div class="settings-card">
+        <div class="form-group">
+          <label>API Key</label>
+          <input class="form-input" id="set-api-key" type="password" placeholder="sk-...">
+          <div class="form-hint">支持 OpenAI / DeepSeek / 通义千问等兼容接口</div>
+        </div>
+        <div class="form-group">
+          <label>API 地址</label>
+          <input class="form-input" id="set-base-url" placeholder="https://api.openai.com/v1">
+          <div class="form-hint">DeepSeek: https://api.deepseek.com，通义千问: https://dashscope.aliyuncs.com/compatible-mode/v1</div>
+        </div>
+        <div class="form-group">
+          <label>模型</label>
+          <input class="form-input" id="set-model" placeholder="gpt-4o-mini">
+        </div>
+      </div>
+    </div>
+
+    <!-- 客服设置 -->
+    <div class="set-tab" id="set-tab-agent" style="display:none;">
+      <div class="settings-card">
+        <div class="form-group">
+          <label>机器人名称</label>
+          <input class="form-input" id="set-bot-name" placeholder="小智">
+        </div>
+        <div class="form-group">
+          <label>欢迎语</label>
+          <textarea class="form-input" id="set-welcome" rows="2" placeholder="你好！欢迎来到智联客服..."></textarea>
+        </div>
+        <div class="form-group">
+          <label>知识库增强</label>
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;margin-top:4px;">
+            <input type="checkbox" id="set-knowledge-enabled" checked> AI 自动匹配知识库
+          </label>
+          <div class="form-hint">开启后，AI 会根据客户问题关键词自动查找知识库中最相关的条目作为参考</div>
+        </div>
+        <div class="form-group">
+          <label>系统提示词</label>
+          <textarea class="form-input" id="set-prompt" rows="4">你是一个专业、热情的电商客服助手。你叫小智，来自智联客服团队。你回答简洁专业，对客户的问题给予清晰准确的解答。</textarea>
+          <div class="form-hint">决定了 AI 的回答风格和专业方向</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 平台对接 -->
+    <div class="set-tab" id="set-tab-platform" style="display:none;">
+      <div class="settings-card">
+        <p style="font-size:13px;color:var(--gray-500);margin-bottom:16px;">配置电商平台 API 后，AI 可以查询实时订单信息、物流状态等。</p>
+        <div id="platformList"></div>
+        <button class="btn btn-ghost btn-sm" style="margin-top:8px;" onclick="showAddPlatform()">+ 新增平台对接</button>
+      </div>
+    </div>
+
+    <!-- 浮窗样式 -->
+    <div class="set-tab" id="set-tab-widget" style="display:none;">
+      <div class="settings-card">
+        <div class="form-group">
+          <label>主色调</label>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <input class="form-input" id="set-color" type="color" value="#4F46E5" style="width:48px;height:36px;padding:2px;">
+            <span id="set-color-text" style="font-size:13px;color:var(--gray-500);">#4F46E5</span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>浮窗位置</label>
+          <select class="form-input" id="set-position">
+            <option value="right">右下角</option>
+            <option value="left">左下角</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <button class="btn btn-primary btn-block" onclick="saveSettings()" style="margin-top:12px;">&#10003; 保存所有设置</button>
+  </div>
+</div>
+
+<!-- 新增平台弹窗 -->
+<div id="platformEditModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);z-index:99999;align-items:center;justify-content:center;" onclick="if(event.target===this)closePlatformEdit()">
+  <div style="background:white;border-radius:16px;width:500px;max-width:90vw;padding:28px;" onclick="event.stopPropagation()">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+      <h2 style="font-size:18px;font-weight:700;">新增平台对接</h2>
+      <button class="btn btn-ghost btn-sm" onclick="closePlatformEdit()">&#10005;</button>
+    </div>
+    <div class="form-group">
+      <label>平台类型</label>
+      <select class="form-input" id="plat-type">
+        <option value="taobao">淘宝 / 天猫</option>
+        <option value="pdd">拼多多</option>
+        <option value="shopify">Shopify</option>
+        <option value="douyin">抖音小店</option>
+        <option value="weixin">微信小店</option>
+        <option value="jds">京东</option>
+        <option value="other">其他</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>App Key / Client ID</label>
+      <input class="form-input" id="plat-key" placeholder="输入平台提供的 App Key">
+    </div>
+    <div class="form-group">
+      <label>App Secret</label>
+      <input class="form-input" id="plat-secret" type="password" placeholder="输入平台提供的 App Secret">
+    </div>
+    <div class="form-group">
+      <label>店铺 ID（可选）</label>
+      <input class="form-input" id="plat-shop-id" placeholder="如有多个店铺，填写店铺标识">
+    </div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:8px;">
+      <button class="btn btn-secondary" onclick="closePlatformEdit()">取消</button>
+      <button class="btn btn-primary" onclick="savePlatform()">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast-container" id="toastContainer"></div>
+
+<script src="/js/dashboard.js"></script>
+</body>
+</html>
+
+
+

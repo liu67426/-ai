@@ -1,0 +1,56 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>智联AI客服 - 聊天浮窗演示</title>
+<link rel="stylesheet" href="/css/style.css">
+<style>
+.demo-content { max-width: 800px; margin: 60px auto; padding: 0 24px; }
+.demo-content h1 { font-size: 28px; font-weight: 700; margin-bottom: 12px; }
+.demo-content p { color: #666; line-height: 1.7; margin-bottom: 16px; }
+.demo-content .card { background: #f9f9f9; border-radius: 12px; padding: 24px; margin: 24px 0; border: 1px solid #eee; }
+.demo-content code { background: #eee; padding: 2px 6px; border-radius: 4px; font-size: 13px; }
+.demo-content pre { background: #1e1e2e; color: #cdd6f4; padding: 20px; border-radius: 8px; overflow-x: auto; font-size: 13px; line-height: 1.6; }
+</style>
+</head>
+<body>
+<div class="demo-content">
+  <h1>&#128172; 聊天浮窗演示页</h1>
+  <p>点击右下角的聊天按钮，体验智联AI客服的聊天浮窗功能。这个浮窗可以嵌入到任何电商网站中，为客户提供即时的AI客服支持。</p>
+
+  <div class="card">
+    <h3>&#128279; 嵌入方式</h3>
+    <p>在你的网站 &lt;/body&gt; 之前添加以下代码即可嵌入客服浮窗：</p>
+    <pre>&lt;!-- 智联AI客服浮窗 --&gt;
+&lt;link rel="stylesheet" href="https://你的域名/css/style.css"&gt;
+&lt;div id="zhilian-widget"&gt;&lt;/div&gt;
+&lt;script&gt;
+window.ZHILIAN_CONFIG = {
+  serverUrl: "https://你的域名",
+  botName: "小智",
+  primaryColor: "#4F46E5"
+};
+&lt;/script&gt;
+&lt;script src="https://你的域名/js/widget.js"&gt;&lt;/script&gt;</pre>
+  </div>
+
+  <div class="card">
+    <h3>&#128161; 功能特点</h3>
+    <ul style="line-height:2;padding-left:20px;">
+      <li>AI 自动回复客户的常见问题</li>
+      <li>支持商品咨询、订单查询、售后处理</li>
+      <li>自定义品牌颜色和欢迎语</li>
+      <li>对话记录持久保存</li>
+      <li>无缝对接客服工作台</li>
+    </ul>
+  </div>
+
+  <p style="text-align:center;color:#999;margin-top:60px;">&#128073; 点击右下角的聊天按钮试试吧！</p>
+</div>
+
+<!-- 聊天浮窗 -->
+<div id="zhilian-widget"></div>
+<script src="/js/widget.js"></script>
+</body>
+</html>

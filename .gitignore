@@ -1,0 +1,20 @@
+﻿# Python
+__pycache__/
+*.pyc
+*.pyo
+*.db
+.env
+
+# 本地数据
+data/
+
+# 临时文件
+*.log
+*.txt
+*.bat
+fix_db.py
+check_api.py
+
+# IDE
+.idea/
+.vscode/
