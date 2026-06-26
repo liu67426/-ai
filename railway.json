@@ -5,7 +5,7 @@
         "rootDirectory": "server"
     },
     "deploy": {
-        "startCommand": "python main.py",
+        "startCommand": "cd server && python main.py",
         "restartPolicyType": "ON_FAILURE",
         "restartPolicyMaxRetries": 10
     }
