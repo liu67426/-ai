@@ -332,6 +332,11 @@
       <label>店铺 ID（可选）</label>
       <input class="form-input" id="plat-shop-id" placeholder="如有多个店铺，填写店铺标识">
     </div>
+    <div class="form-group" id="plat-token-group" style="display:none;">
+      <label>Access Token / Session Key</label>
+      <input class="form-input" id="plat-token" type="password" placeholder="从开放平台获取">
+      <div class="form-hint">拼多多/抖音填 access_token，淘宝/抖音填 session_key</div>
+    </div>
     <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:8px;">
       <button class="btn btn-secondary" onclick="closePlatformEdit()">取消</button>
       <button class="btn btn-primary" onclick="savePlatform()">保存</button>

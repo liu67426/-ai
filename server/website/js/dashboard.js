@@ -624,10 +624,12 @@ async function deleteKnowledge(id) {
 // ═══════════════════ 平台对接 ═══════════════════
 
 function showAddPlatform() {
-  document.getElementById("plat-type").value = "taobao";
+  document.getElementById("plat-type").value = "pdd";
   document.getElementById("plat-key").value = "";
   document.getElementById("plat-secret").value = "";
   document.getElementById("plat-shop-id").value = "";
+  document.getElementById("plat-token").value = "";
+  document.getElementById("plat-token-group").style.display = "block";
   document.getElementById("platformEditModal").style.display = "flex";
 }
 
@@ -650,7 +652,7 @@ async function savePlatform() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         platform: platform,
-        config: { app_key: key, app_secret: secret, shop_id: shopId }
+        config: { app_key: key, app_secret: secret, shop_id: shopId, access_token: document.getElementById("plat-token").value.trim() }
       })
     });
     if (res.ok) {
@@ -682,6 +684,7 @@ async function loadPlatforms() {
         <div style="display:flex;align-items:center;gap:10px;">
           <span style="font-size:13px;font-weight:600;">${name}</span>
           <span style="font-size:11px;color:var(--gray-500);">${cfg.app_key || ""}</span>
+          <span style="font-size:10px;color:var(--gray-400);">${cfg.access_token ? "token已配" : ""}</span>
           <span style="font-size:11px;padding:1px 6px;border-radius:8px;background:${p.enabled ? "var(--success)" : "var(--gray-300)"};color:white;">${p.enabled ? "已启用" : "已禁用"}</span>
         </div>
         <div style="display:flex;gap:4px;">
